@@ -52,8 +52,8 @@ public class CategoryController {
     public ResponseEntity saveCategory(@RequestBody CategoryDto categoryDto) {
         try {
             Category category = dtoMapper.categoryDtoToCategory(categoryDto);
-            categoryService.saveCategory(category);
-            return new ResponseEntity<>(HttpStatus.OK);
+            CategoryDto result = dtoMapper.categoryToCategoryDto(categoryService.saveCategory(category));
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

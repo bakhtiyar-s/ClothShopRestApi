@@ -8,7 +8,7 @@ public interface CategoryService {
 
     List<Category> findAllCategories();
 
-    void saveCategory(Category category);
+    Category saveCategory(Category category);
 
     Optional<Category> findCategoryById(int id);
 }

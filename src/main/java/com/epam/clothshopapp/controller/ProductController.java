@@ -43,8 +43,8 @@ public class ProductController {
     @PostMapping
     public ResponseEntity saveProduct(@RequestBody ProductDto productDto) {
         try {
-            productService.saveProduct(dtoMapper.productDtoToProduct(productDto));
-            return new ResponseEntity<>(HttpStatus.OK);
+            Product product = productService.saveProduct(dtoMapper.productDtoToProduct(productDto));
+            return new ResponseEntity<>(dtoMapper.productToProductDto(product) ,HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
