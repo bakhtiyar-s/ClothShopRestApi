@@ -6,10 +6,10 @@ import com.epam.clothshopapp.mapper.dto.ProductDto;
 import com.epam.clothshopapp.model.Product;
 import com.epam.clothshopapp.service.ProductService;
 import io.swagger.annotations.Api;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/products")
 @Api(tags = {SwaggerConfig.PRODUCT})
+@PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
 public class ProductController {
     private ProductService productService;
     private DtoMapper dtoMapper;

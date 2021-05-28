@@ -3,7 +3,6 @@ package com.epam.clothshopapp.mapper;
 import com.epam.clothshopapp.mapper.dto.*;
 import com.epam.clothshopapp.model.*;
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
 public interface DtoMapper {

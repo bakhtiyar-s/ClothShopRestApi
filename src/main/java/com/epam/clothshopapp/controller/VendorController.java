@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/vendors")
 @Api(tags = {SwaggerConfig.VENDOR})
+@PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
 public class VendorController {
     private VendorService vendorService;
     private DtoMapper dtoMapper;
@@ -43,6 +45,7 @@ public class VendorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity saveVendor(@RequestBody VendorDto vendorDto) {
         try {
             vendorService.saveVendor(dtoMapper.vendorDtoToVendor(vendorDto));
@@ -68,6 +71,7 @@ public class VendorController {
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity updateVendorById(@PathVariable("id") int id, @RequestBody VendorDto vendorDto) {
         try {
             vendorService.updateVendorById(id, dtoMapper.vendorDtoToVendor(vendorDto));
@@ -78,6 +82,7 @@ public class VendorController {
     }
 
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity deleteVendorById(@PathVariable("id") int id) {
         try {
             vendorService.deleteVendorById(id);

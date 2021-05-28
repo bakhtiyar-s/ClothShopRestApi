@@ -6,7 +6,6 @@ import com.epam.clothshopapp.model.Status;
 import com.epam.clothshopapp.repository.OrderRepository;
 import com.epam.clothshopapp.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

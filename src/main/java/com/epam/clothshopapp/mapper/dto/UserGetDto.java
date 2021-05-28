@@ -1,6 +1,5 @@
 package com.epam.clothshopapp.mapper.dto;
 
-import com.epam.clothshopapp.model.Order;
 import lombok.Data;
 
 import java.util.List;

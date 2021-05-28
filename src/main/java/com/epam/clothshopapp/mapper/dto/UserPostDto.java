@@ -1,6 +1,6 @@
 package com.epam.clothshopapp.mapper.dto;
 
-import com.epam.clothshopapp.model.Order;
+import com.epam.clothshopapp.security.Role;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +14,7 @@ public class UserPostDto {
     private String email;
     private String password;
     private String phone;
+    private Role role;
     private List<OrderDto> orders;
 
 }

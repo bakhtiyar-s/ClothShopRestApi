@@ -1,6 +1,5 @@
 package com.epam.clothshopapp.mapper.dto;
 
-import com.epam.clothshopapp.model.Product;
 import com.epam.clothshopapp.model.Status;
 import lombok.Data;
 

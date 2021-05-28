@@ -1,5 +1,6 @@
 package com.epam.clothshopapp.model;
 
+import com.epam.clothshopapp.security.Role;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +21,8 @@ public class User {
     private String email;
     private String password;
     private String phone;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval=false)
     @JoinColumn(name = "user_id", nullable = true)
     private List<Order> orders;

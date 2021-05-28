@@ -21,4 +21,6 @@ public interface UserService {
     List<Order> findOrdersByUserId(int id);
 
     void saveOrderToUser(int id, Order order);
+
+    User findUserByUsername(String username);
 }

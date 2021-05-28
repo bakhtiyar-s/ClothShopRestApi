@@ -1,15 +1,11 @@
 package com.epam.clothshopapp.controller;
 
 import com.epam.clothshopapp.mapper.DtoMapper;
-import com.epam.clothshopapp.mapper.dto.CategoryDto;
 import com.epam.clothshopapp.mapper.dto.ProductDto;
-import com.epam.clothshopapp.model.Category;
 import com.epam.clothshopapp.model.Product;
-import com.epam.clothshopapp.model.Status;
 import com.epam.clothshopapp.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,7 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.epam.clothshopapp.controller.testUtils.*;
+import static com.epam.clothshopapp.controller.testUtils.createProduct;
+import static com.epam.clothshopapp.controller.testUtils.populateProducts;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
