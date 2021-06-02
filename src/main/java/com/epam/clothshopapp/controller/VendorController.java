@@ -8,36 +8,30 @@ import com.epam.clothshopapp.model.Product;
 import com.epam.clothshopapp.model.Vendor;
 import com.epam.clothshopapp.service.VendorService;
 import io.swagger.annotations.Api;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/vendors")
 @Api(tags = {SwaggerConfig.VENDOR})
 @PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
+@RequiredArgsConstructor
 public class VendorController {
-    private VendorService vendorService;
-    private DtoMapper dtoMapper;
-
-    @Autowired
-    public VendorController(VendorService vendorService, DtoMapper dtoMapper) {
-        this.vendorService = vendorService;
-        this.dtoMapper = dtoMapper;
-    }
+    private final VendorService vendorService;
+    private final DtoMapper<Vendor, VendorDto> vendorMapper;
+    private final DtoMapper<Product, ProductDto> productMapper;
 
     @GetMapping
     public ResponseEntity findAllVendors() {
         try {
-            List<Vendor> vendors = vendorService.findAllVendors();
-            List<VendorDto> vendorDtos = vendors.stream().map(vendor -> dtoMapper.vendorToVendorDto(vendor)).collect(Collectors.toList());
+            List<Vendor> vendors = vendorService.findAll();
+            List<VendorDto> vendorDtos = vendors.stream().map(vendor -> vendorMapper.toDto(vendor)).collect(Collectors.toList());
             return new ResponseEntity<>(vendorDtos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -48,7 +42,7 @@ public class VendorController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity saveVendor(@RequestBody VendorDto vendorDto) {
         try {
-            vendorService.saveVendor(dtoMapper.vendorDtoToVendor(vendorDto));
+            vendorService.save(vendorMapper.fromDto(vendorDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -59,12 +53,9 @@ public class VendorController {
     @GetMapping(value = "/{id}")
     public ResponseEntity findVendorById(@PathVariable("id") int id) {
         try {
-            Optional<Vendor> vendor = vendorService.findVendorById(id);
-            if (vendor.isPresent()) {
-                return new ResponseEntity<>(dtoMapper.vendorToVendorDto(vendor.get()), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+            Vendor vendor = vendorService.findById(id);
+            return new ResponseEntity<>(vendorMapper.toDto(vendor), HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -74,7 +65,7 @@ public class VendorController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity updateVendorById(@PathVariable("id") int id, @RequestBody VendorDto vendorDto) {
         try {
-            vendorService.updateVendorById(id, dtoMapper.vendorDtoToVendor(vendorDto));
+            vendorService.updateVendorById(id, vendorMapper.fromDto(vendorDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -85,7 +76,7 @@ public class VendorController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity deleteVendorById(@PathVariable("id") int id) {
         try {
-            vendorService.deleteVendorById(id);
+            vendorService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,7 +87,7 @@ public class VendorController {
     public ResponseEntity findProductsByVendorId(@PathVariable("id") int id) {
         try {
             List<Product> products = vendorService.findProductsByVendorId(id);
-            List<ProductDto> productDtos = products.stream().map(product -> dtoMapper.productToProductDto(product)).collect(Collectors.toList());
+            List<ProductDto> productDtos = products.stream().map(product -> productMapper.toDto(product)).collect(Collectors.toList());
             return new ResponseEntity<>(productDtos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -106,7 +97,7 @@ public class VendorController {
     @PostMapping(value = "/{id}/products")
     public ResponseEntity saveProductToVendor(@PathVariable("id") int id, @RequestBody ProductDto productDto) {
         try {
-            vendorService.saveProductToVendor(id, dtoMapper.productDtoToProduct(productDto));
+            vendorService.saveProductToVendor(id, productMapper.fromDto(productDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

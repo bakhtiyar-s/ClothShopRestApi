@@ -1,6 +1,6 @@
 package com.epam.clothshopapp.mapper.dto;
 
-import com.epam.clothshopapp.security.Role;
+import com.epam.clothshopapp.model.Role;
 import lombok.Data;
 
 import java.util.List;

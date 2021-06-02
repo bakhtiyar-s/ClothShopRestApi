@@ -6,6 +6,7 @@ import com.epam.clothshopapp.mapper.dto.ProductDto;
 import com.epam.clothshopapp.model.Product;
 import com.epam.clothshopapp.service.ProductService;
 import io.swagger.annotations.Api;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,21 +21,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/products")
 @Api(tags = {SwaggerConfig.PRODUCT})
 @PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
+@RequiredArgsConstructor
 public class ProductController {
-    private ProductService productService;
-    private DtoMapper dtoMapper;
 
-    @Autowired
-    public ProductController(ProductService productService, DtoMapper dtoMapper) {
-        this.productService = productService;
-        this.dtoMapper = dtoMapper;
-    }
+    private final ProductService productService;
+    private final DtoMapper<Product, ProductDto> productMapper;
 
     @GetMapping
     public ResponseEntity findAllProducts() {
         try {
-            List<Product> products = productService.findAllProducts();
-            List<ProductDto> productDtos = products.stream().map(product -> dtoMapper.productToProductDto(product)).collect(Collectors.toList());
+            List<Product> products = productService.findAll();
+            List<ProductDto> productDtos = products.stream().map(product -> productMapper.toDto(product)).collect(Collectors.toList());
             return new ResponseEntity<>(productDtos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -44,8 +41,8 @@ public class ProductController {
     @PostMapping
     public ResponseEntity saveProduct(@RequestBody ProductDto productDto) {
         try {
-            Product product = productService.saveProduct(dtoMapper.productDtoToProduct(productDto));
-            return new ResponseEntity<>(dtoMapper.productToProductDto(product) ,HttpStatus.OK);
+            Product product = productService.save(productMapper.fromDto(productDto));
+            return new ResponseEntity<>(productMapper.toDto(product) ,HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -55,12 +52,8 @@ public class ProductController {
     @GetMapping(value = "/{id}")
     public ResponseEntity findProductById(@PathVariable("id") int id) {
         try {
-            Optional<Product> product = productService.findProductById(id);
-            if (product.isPresent()) {
-                return new ResponseEntity<>(dtoMapper.productToProductDto(product.get()), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+            Product product = productService.findById(id);
+            return new ResponseEntity<>(productMapper.toDto(product), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -69,7 +62,7 @@ public class ProductController {
     @PutMapping(value = "/{id}")
     public ResponseEntity updateProductById(@PathVariable("id") int id, @RequestBody ProductDto productDto) {
         try {
-            productService.updateProductById(id, dtoMapper.productDtoToProduct(productDto));
+            productService.updateById(id, productMapper.fromDto(productDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -79,7 +72,7 @@ public class ProductController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity deleteProductById(@PathVariable("id") int id) {
         try {
-            productService.deleteProductById(id);
+            productService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

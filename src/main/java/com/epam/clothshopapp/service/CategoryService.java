@@ -1,14 +1,10 @@
 package com.epam.clothshopapp.service;
 
 import com.epam.clothshopapp.model.Category;
-import java.util.List;
-import java.util.Optional;
+import com.epam.clothshopapp.repository.CategoryRepository;
+import org.springframework.stereotype.Service;
 
-public interface CategoryService {
+@Service
+public class CategoryService extends GenericService<Category, Integer, CategoryRepository > {
 
-    List<Category> findAllCategories();
-
-    Category saveCategory(Category category);
-
-    Optional<Category> findCategoryById(int id);
 }

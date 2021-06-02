@@ -1,33 +1,44 @@
 package com.epam.clothshopapp.security;
 
+import com.epam.clothshopapp.model.Permission;
+import com.epam.clothshopapp.model.Role;
 import com.epam.clothshopapp.model.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Data
 public class UserDetailsImpl implements UserDetails {
-    private final String username;
-    private final String password;
-    private final List<SimpleGrantedAuthority> authorities;
+
+    private User user;
+
+    public UserDetailsImpl(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        Role role = user.getRole();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        for (Permission permission: role.getPermissions()) {
+            authorities.add(new SimpleGrantedAuthority(permission.getName()));
+        }
         return authorities;
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
@@ -48,12 +59,5 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public static UserDetails fromUser(User user) {
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.getRole().getAuthorities());
     }
 }

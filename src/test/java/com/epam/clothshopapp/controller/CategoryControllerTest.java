@@ -41,12 +41,15 @@ class CategoryControllerTest {
     private CategoryService categoryService;
 
     @Autowired
-    private DtoMapper dtoMapper;
+    private DtoMapper<Category, CategoryDto> categoryMapper;
+
+    @Autowired
+    private DtoMapper<Product, ProductDto> productMapper;
 
     @Test
     void findAllCategories() throws Exception {
         populateCategories();
-        List<Category> fromDb = categoryService.findAllCategories();
+        List<Category> fromDb = categoryService.findAll();
 
         String httpResponse = mockMvc.perform(get("/api/categories"))
                 .andDo(print())
@@ -56,7 +59,7 @@ class CategoryControllerTest {
                 .getContentAsString();
 
         List<CategoryDto> categoryDtos = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        List<Category> categories = categoryDtos.stream().map(categoryDto -> dtoMapper.categoryDtoToCategory(categoryDto)).collect(Collectors.toList());
+        List<Category> categories = categoryDtos.stream().map(categoryDto -> categoryMapper.fromDto(categoryDto)).collect(Collectors.toList());
 
         assertEquals(fromDb.toString(), categories.toString());
 
@@ -65,7 +68,7 @@ class CategoryControllerTest {
     @Test
     void saveCategory() throws Exception {
         Category categoryToSave = createCategory();
-        String requestBody = objectMapper.writeValueAsString(dtoMapper.categoryToCategoryDto(categoryToSave));
+        String requestBody = objectMapper.writeValueAsString(categoryMapper.toDto(categoryToSave));
 
         String httpResponse = mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,11 +80,10 @@ class CategoryControllerTest {
                 .getContentAsString();
 
         CategoryDto categoryDto = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        Category category = dtoMapper.categoryDtoToCategory(categoryDto);
-        Optional<Category> fromDb = categoryService.findCategoryById(category.getId());
+        Category category = categoryMapper.fromDto(categoryDto);
+        Category fromDb = categoryService.findById(category.getId());
 
-        assertTrue(fromDb.isPresent());
-        assertEquals(fromDb.get().toString(), category.toString());
+        assertEquals(fromDb.toString(), category.toString());
     }
 
     @Test
@@ -97,7 +99,7 @@ class CategoryControllerTest {
                 .getContentAsString();
 
         CategoryDto categoryDto = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        Category category = dtoMapper.categoryDtoToCategory(categoryDto);
+        Category category = categoryMapper.fromDto(categoryDto);
 
         assertEquals(savedCategory.toString(), category.toString());
     }
@@ -114,7 +116,7 @@ class CategoryControllerTest {
                 .getContentAsString();
 
         List<ProductDto> productDtos = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        List<Product> products = productDtos.stream().map(productDto -> dtoMapper.productDtoToProduct(productDto)).collect(Collectors.toList());
+        List<Product> products = productDtos.stream().map(productDto -> productMapper.fromDto(productDto)).collect(Collectors.toList());
 
         assertFalse(products.isEmpty());
         assertEquals(savedProducts.toString(), products.toString());

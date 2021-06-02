@@ -2,25 +2,46 @@ package com.epam.clothshopapp.service;
 
 import com.epam.clothshopapp.model.Order;
 import com.epam.clothshopapp.model.User;
+import com.epam.clothshopapp.repository.OrderRepository;
+import com.epam.clothshopapp.repository.UserRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface UserService {
+@Service
+@AllArgsConstructor
+public class UserService extends GenericService<User, Integer, UserRepository> {
 
-    List<User> findAllUsers();
+    OrderRepository orderRepository;
 
-    void saveUser(User user);
+    public void updateById(int id, User user) {
+        User oldUser = super.findById(id);
+        oldUser.setUsername(user.getUsername());
+        oldUser.setFirstName(user.getFirstName());
+        oldUser.setLastName(user.getLastName());
+        oldUser.setEmail(user.getEmail());
+        oldUser.setPassword(user.getPassword());
+        oldUser.setPhone(user.getPhone());
+        oldUser.setOrders(user.getOrders());
+        super.save(oldUser);
+    }
 
-    Optional<User> findUserById(int id);
+    public List<Order> findOrdersByUserId(int id) {
+        User user = super.findById(id);
+        return user.getOrders();
+    }
 
-    void updateUserById(int id, User user);
+    public void saveOrderToUser(int id, Order order) {
+        User user = super.findById(id);
+        List<Order> orders = user.getOrders();
+        orderRepository.save(order);
+        orders.add(order);
+        user.setOrders(orders);
+        super.save(user);
+    }
 
-    void deleteUserById(int id);
-
-    List<Order> findOrdersByUserId(int id);
-
-    void saveOrderToUser(int id, Order order);
-
-    User findUserByUsername(String username);
+    public User findUserByUsername(String username) {
+        return super.r.findUserByUsername(username);
+    }
 }

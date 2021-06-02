@@ -1,7 +1,9 @@
 package com.epam.clothshopapp.controller;
 
 import com.epam.clothshopapp.mapper.DtoMapper;
+import com.epam.clothshopapp.mapper.dto.CategoryDto;
 import com.epam.clothshopapp.mapper.dto.ProductDto;
+import com.epam.clothshopapp.model.Category;
 import com.epam.clothshopapp.model.Product;
 import com.epam.clothshopapp.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -40,7 +42,7 @@ class ProductControllerTest {
     private ProductService productService;
 
     @Autowired
-    private DtoMapper dtoMapper;
+    private DtoMapper<Product, ProductDto> productMapper;
 
 
     @Test
@@ -55,7 +57,7 @@ class ProductControllerTest {
                 .getContentAsString();
 
         List<ProductDto> productDtos = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        List<Product> products = productDtos.stream().map(productDto -> dtoMapper.productDtoToProduct(productDto)).collect(Collectors.toList());
+        List<Product> products = productDtos.stream().map(productDto -> productMapper.fromDto(productDto)).collect(Collectors.toList());
 
         assertFalse(products.isEmpty());
         assertEquals(savedProducts.toString(), products.toString());
@@ -64,7 +66,7 @@ class ProductControllerTest {
     @Test
     void saveProduct() throws Exception {
         Product productToSave = createProduct();
-        String requestBody = objectMapper.writeValueAsString(dtoMapper.productToProductDto(productToSave));
+        String requestBody = objectMapper.writeValueAsString(productMapper.toDto(productToSave));
 
         String httpResponse = mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,11 +78,10 @@ class ProductControllerTest {
                 .getContentAsString();
 
         ProductDto productDto = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        Product product = dtoMapper.productDtoToProduct(productDto);
-        Optional<Product> fromDb = productService.findProductById(product.getId());
+        Product product = productMapper.fromDto(productDto);
+        Product fromDb = productService.findById(product.getId());
 
-        assertTrue(fromDb.isPresent());
-        assertEquals(fromDb.get().toString(), product.toString());
+        assertEquals(fromDb.toString(), product.toString());
     }
 
     @Test
@@ -96,7 +97,7 @@ class ProductControllerTest {
                 .getContentAsString();
 
         ProductDto productDto = objectMapper.readValue(httpResponse, new TypeReference<>() {});
-        Product product = dtoMapper.productDtoToProduct(productDto);
+        Product product = productMapper.fromDto(productDto);
 
         assertEquals(savedProduct.toString(), product.toString());
     }
@@ -106,7 +107,7 @@ class ProductControllerTest {
         Product productToSave = createProduct();
         Product savedProduct = testUtils.saveProduct(productToSave);
         productToSave.setName("name_updated");
-        String requestBody = objectMapper.writeValueAsString(dtoMapper.productToProductDto(productToSave));
+        String requestBody = objectMapper.writeValueAsString(productMapper.toDto(productToSave));
 
         mockMvc.perform(put("/api/products/" + savedProduct.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -114,10 +115,9 @@ class ProductControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Optional<Product> fromDb = productService.findProductById(savedProduct.getId());
+        Product fromDb = productService.findById(savedProduct.getId());
 
-        assertTrue(fromDb.isPresent());
-        assertEquals(productToSave.getName(), fromDb.get().getName());
+        assertEquals(productToSave.getName(), fromDb.getName());
     }
 
     @Test
@@ -129,7 +129,7 @@ class ProductControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Optional<Product> fromDb = productService.findProductById(savedProduct.getId());
-        assertFalse(fromDb.isPresent());
+        Product fromDb = productService.findById(savedProduct.getId());
+        assertNull(fromDb);
     }
 }

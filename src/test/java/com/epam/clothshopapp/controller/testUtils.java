@@ -37,7 +37,7 @@ public class testUtils {
             category.setName("category_" + i);
             category.setProducts(new ArrayList<>());
 
-            categoryService.saveCategory(category);
+            categoryService.save(category);
         }
     }
 
@@ -49,7 +49,7 @@ public class testUtils {
     }
 
     public static Category saveCategory(Category category) {
-        return categoryService.saveCategory(category);
+        return categoryService.save(category);
     }
 
     public static List<Product> populateProducts() {
@@ -63,7 +63,7 @@ public class testUtils {
             product.setQuantity(i*10);
             product.setCategoryId(categoryId);
 
-            Product savedProduct = productService.saveProduct(product);
+            Product savedProduct = productService.save(product);
             products.add(savedProduct);
         }
         return products;
@@ -81,6 +81,6 @@ public class testUtils {
     }
 
     public static Product saveProduct(Product product) {
-        return productService.saveProduct(product);
+        return productService.save(product);
     }
 }

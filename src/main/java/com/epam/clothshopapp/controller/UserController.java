@@ -34,7 +34,9 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final DtoMapper dtoMapper;
+    private final DtoMapper<User, UserGetDto> userGetMapper;
+    private final DtoMapper<User, UserPostDto> userPostMapper;
+    private final DtoMapper<Order, OrderDto> orderMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -42,8 +44,8 @@ public class UserController {
     @PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')")
     public ResponseEntity findAllUsers() {
         try {
-            List<User> users = userService.findAllUsers();
-            List<UserGetDto> userGetDtos = users.stream().map(user -> dtoMapper.userToUserGetDto(user)).collect(Collectors.toList());
+            List<User> users = userService.findAll();
+            List<UserGetDto> userGetDtos = users.stream().map(user -> userGetMapper.toDto(user)).collect(Collectors.toList());
             return new ResponseEntity<>(userGetDtos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -54,7 +56,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity saveUser(@RequestBody UserPostDto userPostDto) {
         try {
-            userService.saveUser(dtoMapper.userPostDtoToUser(userPostDto));
+            userService.save(userPostMapper.fromDto(userPostDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -65,12 +67,9 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
     public ResponseEntity findUserById(@PathVariable("id") int id) {
         try {
-            Optional<User> user = userService.findUserById(id);
-            if (user.isPresent()) {
-                return new ResponseEntity<>(dtoMapper.userToUserGetDto(user.get()), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+            User user = userService.findById(id);
+            return new ResponseEntity<>(userGetMapper.toDto(user), HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -80,7 +79,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity updateUserById(@PathVariable("id") int id, @RequestBody UserPostDto userPostDto) {
         try {
-            userService.updateUserById(id, dtoMapper.userPostDtoToUser(userPostDto));
+            userService.updateById(id, userPostMapper.fromDto(userPostDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,7 +90,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity deleteUserById(@PathVariable("id") int id) {
         try {
-            userService.deleteUserById(id);
+            userService.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -103,7 +102,7 @@ public class UserController {
     public ResponseEntity findOrdersByUserId(@PathVariable("id") int id) {
         try {
             List<Order> orders = userService.findOrdersByUserId(id);
-            List<OrderDto> orderDtos = orders.stream().map(order -> dtoMapper.orderToOrderDto(order)).collect(Collectors.toList());
+            List<OrderDto> orderDtos = orders.stream().map(order -> orderMapper.toDto(order)).collect(Collectors.toList());
             return new ResponseEntity<>(orderDtos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -114,7 +113,7 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
     public ResponseEntity saveOrderToUser(@PathVariable("id") int id, @RequestBody OrderDto orderDto) {
         try {
-            userService.saveOrderToUser(id, dtoMapper.orderDtoToOrder(orderDto));
+            userService.saveOrderToUser(id, orderMapper.fromDto(orderDto));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -129,11 +128,11 @@ public class UserController {
             if (user == null) {
                 throw new UsernameNotFoundException("User does not exists");
             }
-            String token = jwtTokenProvider.createToken(loginDto.getUsername(), user.getRole().name());
+            String token = jwtTokenProvider.createToken(loginDto.getUsername(), user.getRole().getName());
             Map<Object, Object> response = new HashMap<>();
             response.put("username", loginDto.getUsername());
             response.put("token", token);
-            response.put("permission", user.getRole().getPermissions());
+            response.put("permissions", user.getRole().getPermissions());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (AuthenticationException e) {
             return new ResponseEntity<>("Unable to login, check email or password", HttpStatus.UNAUTHORIZED);

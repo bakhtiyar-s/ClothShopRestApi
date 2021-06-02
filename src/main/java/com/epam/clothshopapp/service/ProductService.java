@@ -1,21 +1,25 @@
 package com.epam.clothshopapp.service;
 
-import com.epam.clothshopapp.model.Category;
 import com.epam.clothshopapp.model.Product;
+import com.epam.clothshopapp.repository.ProductRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ProductService {
-    List<Product> findAllProducts();
+@Service
+public class ProductService extends GenericService<Product, Integer, ProductRepository> {
 
-    Product saveProduct(Product product);
+    public List<Product> findProductsByCategoryId(int id) {
+        return super.r.findProductsByCategoryId(id);
+    }
 
-    Optional<Product> findProductById(int id);
+    public void updateById(int id, Product product) {
+        Product oldProduct = super.findById(id);
+        oldProduct.setName(product.getName());
+        oldProduct.setPrice(product.getPrice());
+        oldProduct.setQuantity(product.getQuantity());
+        oldProduct.setCategoryId(product.getCategoryId());
+        super.save(oldProduct);
+    }
 
-    List<Product> findProductsByCategoryId(int categoryId);
-
-    void updateProductById(int id, Product product);
-
-    void deleteProductById(int id);
 }
