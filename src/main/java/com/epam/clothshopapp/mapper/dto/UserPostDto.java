@@ -3,10 +3,11 @@ package com.epam.clothshopapp.mapper.dto;
 import com.epam.clothshopapp.model.Role;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class UserPostDto {
+public class UserPostDto implements Serializable {
     private int id;
     private String username;
     private String firstName;

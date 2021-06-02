@@ -2,8 +2,10 @@ package com.epam.clothshopapp.mapper.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class ProductDto {
+public class ProductDto implements Serializable {
     private int id;
     private String name;
     private Integer price;
